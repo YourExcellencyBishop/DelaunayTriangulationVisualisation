@@ -15,8 +15,8 @@ namespace DelaunayTriangulationVisualisation
         public static ContentManager ContentManager;
 
         private Color BackgroundColor = new(0, 127, 255); // Azure Blue
-        private Color ShapeOutlineColor = new(44, 19, 32); // Midnight Violet
-        private Color ShapeColor = new(95, 75, 102); // Vintage Grape
+        public static Color ShapeOutlineColor = new(44, 19, 32); // Midnight Violet
+        public static Color ShapeColor = new(95, 75, 102); // Vintage Grape
 
         public static readonly (int Width, int Height) Resolution = (1280, 720);
 
@@ -35,6 +35,8 @@ namespace DelaunayTriangulationVisualisation
         {
             // TODO: Add your initialization logic here
 
+            Components.Add(new Input(this));
+            Components.Add(new Visualisation(this));
             Renderer = GraphicsDevice;
 
             base.Initialize();
@@ -67,8 +69,10 @@ namespace DelaunayTriangulationVisualisation
 
             PrimitiveBatch.Begin(Resolution.Width, Resolution.Height);
 
-            PrimitiveBatch.DrawSquare(new Vector2(Resolution.Width / 2, Resolution.Height / 2), 70, ShapeOutlineColor);
-            PrimitiveBatch.DrawSquare(new Vector2(Resolution.Width/2, Resolution.Height/2), 30, ShapeColor);
+            //PrimitiveBatch.DrawSquare(new Vector2(Resolution.Width / 2, Resolution.Height / 2), 70, ShapeOutlineColor);
+            //PrimitiveBatch.DrawSquare(new Vector2(Resolution.Width/2, Resolution.Height/2), 30, ShapeColor);
+
+            
 
             PrimitiveBatch.End();
 
