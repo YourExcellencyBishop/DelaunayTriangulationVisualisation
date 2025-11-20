@@ -14,7 +14,7 @@ namespace DelaunayTriangulationVisualisation
         public static GraphicsDevice Renderer;
         public static ContentManager ContentManager;
 
-        private Color BackgroundColor = new(0, 127, 255); // Azure Blue
+        private Color BackgroundColor = new(255, 253, 253); // Azure Blue
         public static Color ShapeOutlineColor = new(44, 19, 32); // Midnight Violet
         public static Color ShapeColor = new(95, 75, 102); // Vintage Grape
 

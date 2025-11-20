@@ -9,17 +9,21 @@ namespace DelaunayTriangulationVisualisation
     {
         public VertexPositionColor[] Vertices { get; set; }
         public int[] Indices { get; set; }
+        public bool indexed;
         public readonly int vertexCount;
         public readonly int primitiveCount;
         public readonly RasterizerState rasterizerState;
+        public readonly PrimitiveType primitiveType;
 
-        public ShapeData(VertexPositionColor[] vertices, int[] indices, RasterizerState rasterizer = null)
+        public ShapeData(VertexPositionColor[] vertices, int[] indices, bool indexed = true, RasterizerState rasterizer = null, PrimitiveType? primitiveType = null)
         {
             this.Vertices = vertices;
             vertexCount = this.Vertices.Length;
             this.Indices = indices;
             primitiveCount = this.Indices.Length / 3;
             rasterizerState = rasterizer ?? PrimitiveBatch.DefaultRS;
+            this.primitiveType = primitiveType ?? PrimitiveType.TriangleList; 
+            this.indexed = indexed;
         }
     }
 
@@ -116,7 +120,7 @@ namespace DelaunayTriangulationVisualisation
             Vector2[] rotatedVertices = new Vector2[vertices.Length];
             Vector2.Transform(vertices, ref rotationMat, rotatedVertices);
 
-            primitives.Add(new ShapeData(Vector2ToVertex(rotatedVertices, color, translation), indices, rasterizerState));
+            primitives.Add(new ShapeData(Vector2ToVertex(rotatedVertices, color, translation), indices, true, rasterizerState));
         }
 
         public static void DrawPolygon(IList<ValueWrapper<Vector2>> vertices, int[] indices, Color color, Vector2? translation = null, float rotation = 0, RasterizerState rasterizerState = null)
@@ -125,7 +129,7 @@ namespace DelaunayTriangulationVisualisation
             Vector2[] rotatedVertices = new Vector2[vertices.Count];
             Geometry.Transform(vertices, ref rotationMat, rotatedVertices);
 
-            primitives.Add(new ShapeData(Vector2ToVertex(rotatedVertices, color, translation), indices, rasterizerState));
+            primitives.Add(new ShapeData(Vector2ToVertex(rotatedVertices, color, translation), indices, true, rasterizerState));
         }
 
         public static void DrawLine(Vector2 start, Vector2 end, Color color)
@@ -229,6 +233,50 @@ namespace DelaunayTriangulationVisualisation
             ];
 
             DrawPolygon(vertices, [0, 1, 2, 1, 2, 3], color);
+        }
+
+        public static void DrawCircle(Vector2 center, float radius, int segments, Color color)
+        {
+            var verts = new Vector2[segments];
+
+            for (int i = 0; i < segments; i++)
+            {
+                float angle = MathHelper.TwoPi * i / segments;
+                verts[i] = new Vector2(
+                        center.X + radius * MathF.Cos(angle),
+                        center.Y + radius * MathF.Sin(angle)
+                );
+            }
+
+            DrawPolygon(verts, DelaunayTriangulator.Triangulate(verts), color);
+        }
+
+        
+        public static void DrawLine2(Vector2 a, Vector2 b, Color color)
+        {
+            // Default thickness with not zoom.
+            float thickness = 5;
+
+            // If we are using the world camera then we need to adjust the "thickness" of the line
+            //  so no matter how far we have "zoomed" into the world the line will look the same.
+
+            float halfThickness = thickness / 2f;
+
+            // Line edge pointing from "b" to "a".
+            Vector2 e1 = b - a;
+            Vector2 n1 = new(-e1.Y, e1.X);
+
+            e1.Normalize();
+            n1.Normalize();
+
+            e1 *= halfThickness;
+            n1 *= halfThickness;
+
+            Vector2 e2 = -e1;
+            Vector2 n2 = -n1;
+
+            Vector2[] vertices = [a + n1 + e2, b + n1 + e1, b + n2 + e1, a + n2 + e2];
+            DrawPolygon(vertices, [3, 1, 2, 3, 0, 1], color);
         }
     }
 }
